@@ -16,7 +16,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/post-ride" element={<PostRidePage />} />
-        <Route path="/profile" element={<h1>Profile Page</h1>} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </div>
   )
@@ -81,6 +81,46 @@ const PostRidePage = () => {
     </div>
   )
 }
+const ProfilePage = () => {
+  return (
+    <div style={formContainer}>
+      <h2>My Profile</h2>
+      <div style={profileInfo}>
+        <p><strong>Name:</strong> John Zakayo</p>
+        <p><strong>Email:</strong> johnzakayo@gmail.com</p>
+      </div>
+      <div style={buttonContainer}>
+        <button style={dangerButton}>Delete Account</button>
+        <button style={resetButton}>Reset Password</button>
+      </div>
+    </div>
+  )
+}
+const profileInfo = {
+  marginBottom: '20px',
+  fontSize: '18px',
+}
+
+const dangerButton = {
+  padding: '10px 20px',
+  backgroundColor: 'red',
+  color: 'white',
+  border: 'none',
+  borderRadius: '5px',
+  fontSize: '16px',
+  cursor: 'pointer',
+}
+
+const resetButton = {
+  padding: '10px 20px',
+  backgroundColor: '#007BFF',
+  color: 'white',
+  border: 'none',
+  borderRadius: '5px',
+  fontSize: '16px',
+  cursor: 'pointer',
+}
+
 
 const formContainer = {
   maxWidth: '400px',
