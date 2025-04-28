@@ -15,7 +15,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/post-ride" element={<h1>Post Ride Page</h1>} />
+        <Route path="/post-ride" element={<PostRidePage />} />
         <Route path="/profile" element={<h1>Profile Page</h1>} />
       </Routes>
     </div>
@@ -66,6 +66,22 @@ const RegisterPage = () => {
     </div>
   )
 }
+const PostRidePage = () => {
+  return (
+    <div style={formContainer}>
+      <h2>Post a New Ride</h2>
+      <form style={formStyle}>
+        <input type="text" placeholder="Starting Location" style={inputStyle} />
+        <input type="text" placeholder="Destination" style={inputStyle} />
+        <input type="datetime-local" placeholder="Date and Time" style={inputStyle} />
+        <input type="number" placeholder="Available Seats" style={inputStyle} />
+        <input type="number" placeholder="Price per Seat (ksh)" style={inputStyle} />
+        <button type="submit" style={submitButton}>Post Ride</button>
+      </form>
+    </div>
+  )
+}
+
 const formContainer = {
   maxWidth: '400px',
   margin: '50px auto',
