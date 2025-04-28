@@ -39,6 +39,63 @@ const HomePage = () => {
   )
   
 }
+const LoginPage = () => {
+  return (
+    <div style={formContainer}>
+      <h2>Login</h2>
+      <form style={formStyle}>
+        <input type="email" placeholder="Email" style={inputStyle} />
+        <input type="password" placeholder="Password" style={inputStyle} />
+        <button type="submit" style={submitButton}>Login</button>
+      </form>
+    </div>
+  )
+}
+
+const RegisterPage = () => {
+  return (
+    <div style={formContainer}>
+      <h2>Register</h2>
+      <form style={formStyle}>
+        <input type="text" placeholder="Full Name" style={inputStyle} />
+        <input type="email" placeholder="Email" style={inputStyle} />
+        <input type="password" placeholder="Password" style={inputStyle} />
+        <input type="password" placeholder="Confirm Password" style={inputStyle} />
+        <button type="submit" style={submitButton}>Register</button>
+      </form>
+    </div>
+  )
+}
+const formContainer = {
+  maxWidth: '400px',
+  margin: '50px auto',
+  padding: '20px',
+  border: '1px solid #ccc',
+  borderRadius: '10px',
+  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+}
+
+const formStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+}
+
+const inputStyle = {
+  marginBottom: '15px',
+  padding: '10px',
+  fontSize: '16px',
+}
+
+const submitButton = {
+  padding: '10px',
+  backgroundColor: '#4CAF50',
+  color: 'white',
+  border: 'none',
+  fontSize: '18px',
+  borderRadius: '5px',
+  cursor: 'pointer',
+}
+
 
 
 const navStyle = {
