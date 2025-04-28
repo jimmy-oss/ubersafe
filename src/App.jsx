@@ -17,6 +17,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/post-ride" element={<PostRidePage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/search" element={<SearchRidesPage />} />
       </Routes>
     </div>
   )
@@ -96,6 +97,19 @@ const ProfilePage = () => {
     </div>
   )
 }
+const SearchRidesPage = () => {
+  return (
+    <div style={formContainer}>
+      <h2>Search for a Ride</h2>
+      <form style={formStyle}>
+        <input type="text" placeholder="Starting Location" style={inputStyle} />
+        <input type="text" placeholder="Destination" style={inputStyle} />
+        <button type="submit" style={submitButton}>Search</button>
+      </form>
+    </div>
+  )
+}
+
 const profileInfo = {
   marginBottom: '20px',
   fontSize: '18px',
