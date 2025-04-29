@@ -37,14 +37,20 @@ form input {
   font-size: 16px;
   background-color: #fff;
   color: #333;
-  transition: 0.2s ease-in-out;
+  transition: border 0.2s ease-in-out;
 }
-
 
 form input:focus {
   border-color: #764ba2;
   outline: none;
 }
+
+input:-webkit-autofill {
+  background-color: #fff !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: #333 !important;
+}
+
 
 button {
   background-color: #764ba2;
