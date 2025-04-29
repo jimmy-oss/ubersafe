@@ -3,13 +3,14 @@ import { Routes, Route, Link } from 'react-router-dom'
 function App() {
   return (
     <div>
-      <nav style={navStyle}>
-        <Link to="/">Home</Link> | 
-        <Link to="/login">Login</Link> | 
-        <Link to="/register">Register</Link> | 
-        <Link to="/post-ride">Post Ride</Link> | 
-        <Link to="/profile">Profile</Link>
-      </nav>
+     <nav className="navbar">
+     <Link to="/">Home</Link>
+     <Link to="/login">Login</Link>
+     <Link to="/register">Register</Link>
+     <Link to="/post-ride">Post Ride</Link>
+     <Link to="/profile">Profile</Link>
+</nav>
+
 
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -26,11 +27,13 @@ function App() {
 const HomePage = () => {
   return (
     <div className="form-wrapper">
-      <h1 style={{ textAlign: 'center' }}>Welcome to UberSafe</h1>
-      <p style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+      <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '1rem' }}>
+        Welcome to UberSafe
+      </h1>
+      <p style={{ textAlign: 'center', color: '#555', marginBottom: '2rem' }}>
         Find or offer rides easily and travel smarter.
       </p>
-      <div style={{ display: 'flex', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <Link to="/search">
           <button>Search for a Ride</button>
         </Link>
@@ -42,20 +45,20 @@ const HomePage = () => {
   )
 }
 
+
 const LoginPage = () => {
   return (
-    <div className="form-wrapper"> 
-    <div style={formContainer}>
+    <div className="form-wrapper">
       <h2>Login</h2>
-      <form style={formStyle}>
-        <input type="email" placeholder="Email" style={inputStyle} />
-        <input type="password" placeholder="Password" style={inputStyle} />
+      <form>
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
         <button type="submit">Login</button>
       </form>
-      </div>
-      </div>
+    </div>
   )
 }
+
 
 const RegisterPage = () => {
   return (
@@ -92,18 +95,19 @@ const PostRidePage = () => {
 const ProfilePage = () => {
   return (
     <div className="form-wrapper">
-      <h2>My Profile</h2>
-      <div style={{ marginBottom: '1.5rem', fontSize: '16px' }}>
+      <h2 style={{ textAlign: 'center', color: '#333' }}>My Profile</h2>
+      <div style={{ marginBottom: '1.5rem', fontSize: '16px', color: '#333' }}>
         <p><strong>Name:</strong> John Zakayo</p>
         <p><strong>Email:</strong> johnzakayo@gmail.com</p>
       </div>
-      <div style={{ display: 'flex', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <button style={{ backgroundColor: 'red' }}>Delete Account</button>
         <button style={{ backgroundColor: '#007BFF' }}>Reset Password</button>
       </div>
     </div>
   )
 }
+
 
 const SearchRidesPage = () => {
   return (
@@ -119,33 +123,7 @@ const SearchRidesPage = () => {
 }
 
 
-const formContainer = {
-  maxWidth: '400px',
-  margin: '50px auto',
-  padding: '20px',
-  border: '1px solid #ccc',
-  borderRadius: '10px',
-  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-}
-
-const formStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-}
-
-const inputStyle = {
-  marginBottom: '15px',
-  padding: '10px',
-  fontSize: '16px',
-}
-
  
-const navStyle = {
-  padding: '20px',
-  backgroundColor: '#333',
-  color: 'white',
-}
-
  
  
 
