@@ -19,6 +19,7 @@ body {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 420px;
+  margin: 5rem auto; /* instead of relying on flex-center in body */
   animation: fadeIn 0.4s ease;
 }
 
