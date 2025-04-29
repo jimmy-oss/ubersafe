@@ -42,6 +42,7 @@ const HomePage = () => {
 }
 const LoginPage = () => {
   return (
+    <div className="form-wrapper"> 
     <div style={formContainer}>
       <h2>Login</h2>
       <form style={formStyle}>
@@ -49,7 +50,8 @@ const LoginPage = () => {
         <input type="password" placeholder="Password" style={inputStyle} />
         <button type="submit" style={submitButton}>Login</button>
       </form>
-    </div>
+      </div>
+      </div>
   )
 }
 
@@ -70,6 +72,7 @@ const RegisterPage = () => {
 
 const PostRidePage = () => {
   return (
+    <div className="form-wrapper">
     <div style={formContainer}>
       <h2>Post a New Ride</h2>
       <form style={formStyle}>
@@ -80,6 +83,7 @@ const PostRidePage = () => {
         <input type="number" placeholder="Price per Seat (ksh)" style={inputStyle} />
         <button type="submit" style={submitButton}>Post Ride</button>
       </form>
+    </div>
     </div>
   )
 }
