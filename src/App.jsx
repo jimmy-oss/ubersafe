@@ -1,14 +1,20 @@
 import { Routes, Route, Link } from 'react-router-dom'
-
+import { FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-icons/fa';
 function App() {
   return (
     <div>
      <nav className="navbar">
-     <Link to="/">Home</Link>
-     <Link to="/login">Login</Link>
-     <Link to="/register">Register</Link>
-     <Link to="/post-ride">Post Ride</Link>
-     <Link to="/profile">Profile</Link>
+  <div style={{ fontWeight: 'bold', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <FaCarSide />
+    UberSafe
+  </div>
+  <div style={{ display: 'flex', gap: '1.5rem' }}>
+    <Link to="/"><FaHome /> Home</Link>
+    <Link to="/login"><FaSignInAlt /> Login</Link>
+    <Link to="/register"><FaUserAlt /> Register</Link>
+    <Link to="/post-ride"><FaPlusCircle /> Post Ride</Link>
+    <Link to="/profile"><FaUserAlt /> Profile</Link>
+  </div>
 </nav>
 
 
