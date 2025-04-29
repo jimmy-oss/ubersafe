@@ -70,23 +70,23 @@ const RegisterPage = () => {
   )
 }
 
+
 const PostRidePage = () => {
   return (
     <div className="form-wrapper">
-    <div style={formContainer}>
-      <h2>Post a New Ride</h2>
-      <form style={formStyle}>
-        <input type="text" placeholder="Starting Location" style={inputStyle} />
-        <input type="text" placeholder="Destination" style={inputStyle} />
-        <input type="datetime-local" placeholder="Date and Time" style={inputStyle} />
-        <input type="number" placeholder="Available Seats" style={inputStyle} />
-        <input type="number" placeholder="Price per Seat (ksh)" style={inputStyle} />
+      <h2>Post a Ride</h2>
+      <form>
+        <input type="text" placeholder="Starting Location" />
+        <input type="text" placeholder="Destination" />
+        <input type="datetime-local" />
+        <input type="number" placeholder="Available Seats" />
+        <input type="number" placeholder="Price per Seat (Ksh)" />
         <button type="submit">Post Ride</button>
       </form>
     </div>
-    </div>
   )
 }
+
 const ProfilePage = () => {
   return (
     <div style={formContainer}>
@@ -104,18 +104,17 @@ const ProfilePage = () => {
 }
 const SearchRidesPage = () => {
   return (
-    <div className="form-wrapper"> 
-    <div style={formContainer}>
+    <div className="form-wrapper">
       <h2>Search for a Ride</h2>
-      <form style={formStyle}>
-        <input type="text" placeholder="Starting Location" style={inputStyle} />
-        <input type="text" placeholder="Destination" style={inputStyle} />
-        <button type="submit" style={submitButton}>Search</button>
+      <form>
+        <input type="text" placeholder="Starting Location" />
+        <input type="text" placeholder="Destination" />
+        <button type="submit">Search</button>
       </form>
-      </div>
-      </div>
+    </div>
   )
 }
+
 
 const profileInfo = {
   marginBottom: '20px',
@@ -163,18 +162,7 @@ const inputStyle = {
   fontSize: '16px',
 }
 
-const submitButton = {
-  padding: '10px',
-  backgroundColor: '#4CAF50',
-  color: 'white',
-  border: 'none',
-  fontSize: '18px',
-  borderRadius: '5px',
-  cursor: 'pointer',
-}
-
-
-
+ 
 const navStyle = {
   padding: '20px',
   backgroundColor: '#333',
