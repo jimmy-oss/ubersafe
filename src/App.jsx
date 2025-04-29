@@ -48,7 +48,7 @@ const LoginPage = () => {
       <form style={formStyle}>
         <input type="email" placeholder="Email" style={inputStyle} />
         <input type="password" placeholder="Password" style={inputStyle} />
-        <button type="submit" style={submitButton}>Login</button>
+        <button type="submit">Login</button>
       </form>
       </div>
       </div>
@@ -81,7 +81,7 @@ const PostRidePage = () => {
         <input type="datetime-local" placeholder="Date and Time" style={inputStyle} />
         <input type="number" placeholder="Available Seats" style={inputStyle} />
         <input type="number" placeholder="Price per Seat (ksh)" style={inputStyle} />
-        <button type="submit" style={submitButton}>Post Ride</button>
+        <button type="submit">Post Ride</button>
       </form>
     </div>
     </div>
@@ -104,6 +104,7 @@ const ProfilePage = () => {
 }
 const SearchRidesPage = () => {
   return (
+    <div className="form-wrapper"> 
     <div style={formContainer}>
       <h2>Search for a Ride</h2>
       <form style={formStyle}>
@@ -111,7 +112,8 @@ const SearchRidesPage = () => {
         <input type="text" placeholder="Destination" style={inputStyle} />
         <button type="submit" style={submitButton}>Search</button>
       </form>
-    </div>
+      </div>
+      </div>
   )
 }
 
