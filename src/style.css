@@ -108,3 +108,22 @@ button:hover {
 .navbar a:hover {
   color: #764ba2;
 }
+input[type="datetime-local"] {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  font-size: 16px;
+}
+.form-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background-color: #fff;
+  color: #333;
+}
