@@ -25,21 +25,23 @@ function App() {
 
 const HomePage = () => {
   return (
-    <div style={homeStyle}>
-      <h1>Welcome to UberSafe </h1>
-      <p>Find or offer rides easily and travel smarter.</p>
-      <div style={buttonContainer}>
+    <div className="form-wrapper">
+      <h1 style={{ textAlign: 'center' }}>Welcome to UberSafe</h1>
+      <p style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        Find or offer rides easily and travel smarter.
+      </p>
+      <div style={{ display: 'flex', gap: '1rem' }}>
         <Link to="/search">
-          <button style={buttonStyle}>Search for a Ride</button>
+          <button>Search for a Ride</button>
         </Link>
         <Link to="/post-ride">
-          <button style={buttonStyle}>Post a Ride</button>
+          <button>Post a Ride</button>
         </Link>
       </div>
     </div>
   )
-  
 }
+
 const LoginPage = () => {
   return (
     <div className="form-wrapper"> 
@@ -89,19 +91,20 @@ const PostRidePage = () => {
 
 const ProfilePage = () => {
   return (
-    <div style={formContainer}>
+    <div className="form-wrapper">
       <h2>My Profile</h2>
-      <div style={profileInfo}>
+      <div style={{ marginBottom: '1.5rem', fontSize: '16px' }}>
         <p><strong>Name:</strong> John Zakayo</p>
         <p><strong>Email:</strong> johnzakayo@gmail.com</p>
       </div>
-      <div style={buttonContainer}>
-        <button style={dangerButton}>Delete Account</button>
-        <button style={resetButton}>Reset Password</button>
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <button style={{ backgroundColor: 'red' }}>Delete Account</button>
+        <button style={{ backgroundColor: '#007BFF' }}>Reset Password</button>
       </div>
     </div>
   )
 }
+
 const SearchRidesPage = () => {
   return (
     <div className="form-wrapper">
@@ -113,32 +116,6 @@ const SearchRidesPage = () => {
       </form>
     </div>
   )
-}
-
-
-const profileInfo = {
-  marginBottom: '20px',
-  fontSize: '18px',
-}
-
-const dangerButton = {
-  padding: '10px 20px',
-  backgroundColor: 'red',
-  color: 'white',
-  border: 'none',
-  borderRadius: '5px',
-  fontSize: '16px',
-  cursor: 'pointer',
-}
-
-const resetButton = {
-  padding: '10px 20px',
-  backgroundColor: '#007BFF',
-  color: 'white',
-  border: 'none',
-  borderRadius: '5px',
-  fontSize: '16px',
-  cursor: 'pointer',
 }
 
 
@@ -169,26 +146,7 @@ const navStyle = {
   color: 'white',
 }
 
-const homeStyle = {
-  textAlign: 'center',
-  marginTop: '50px',
-}
-
-const buttonContainer = {
-  marginTop: '30px',
-  display: 'flex',
-  justifyContent: 'center',
-  gap: '20px',
-}
-
-const buttonStyle = {
-  padding: '10px 20px',
-  fontSize: '18px',
-  cursor: 'pointer',
-  backgroundColor: '#4CAF50',
-  color: 'white',
-  border: 'none',
-  borderRadius: '5px',
-}
+ 
+ 
 
 export default App
