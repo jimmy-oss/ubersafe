@@ -2,14 +2,43 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import jwt from 'jsonwebtoken';
+import protect from "../middleware/auth.js";
 
 const router = express.Router();
 
-// @route   POST /api/register
-// @desc    Register a new user
-// @access  Public
+// Register Route
+router.post("/register", async (req, res) => {
+  const { fullName, email, password, isDriver } = req.body;
 
-// @route   POST /api/login
+  try {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      fullName,
+      email,
+      password: hashedPassword,
+      isDriver,
+    });
+
+    const savedUser = await newUser.save();
+
+    res.status(201).json({
+      _id: savedUser._id,
+      fullName: savedUser.fullName,
+      email: savedUser.email,
+      isDriver: savedUser.isDriver,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// Login Route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -44,41 +73,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Register Route
-router.post("/register", async (req, res) => {
-  const { fullName, email, password, isDriver } = req.body;
-
-  try {
-    // Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create new user
-    const newUser = new User({
-      fullName,
-      email,
-      password: hashedPassword,
-      isDriver,
-    });
-
-    // Save to DB
-    const savedUser = await newUser.save();
-
-    res.status(201).json({
-      _id: savedUser._id,
-      fullName: savedUser.fullName,
-      email: savedUser.email,
-      isDriver: savedUser.isDriver,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
+// ✅ PROTECTED ROUTE (outside login!)
+router.get("/protected", protect, (req, res) => {
+  res.json({ message: "Access granted ✅", user: req.user });
 });
 
 export default router;
