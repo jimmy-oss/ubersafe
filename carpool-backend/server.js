@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from './routes/authRoutes.js';
+import rideRoutes from "./routes/rideRoutes.js";
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ app.use(express.json()); // this comes before the routes
 
 // Routes
 app.use("/api", authRoutes);
-
+app.use("/api/rides", rideRoutes);
 // Test Route
 app.get('/', (req, res) => {
   res.send('Carpool Backend API is Running 🚗');
