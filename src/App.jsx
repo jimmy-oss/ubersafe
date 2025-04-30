@@ -216,23 +216,117 @@ const PostRidePage = () => {
  
 
 
-const ProfilePage = () => {
+ const ProfilePage = () => {
+  const [profilePic, setProfilePic] = useState('https://www.gravatar.com/avatar/default?s=200');
+
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="form-wrapper">
-      <h2 style={{ textAlign: 'center', color: '#333' }}>My Profile</h2>
-      <div style={{ marginBottom: '1.5rem', fontSize: '16px', color: '#333' }}>
+      <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '1.5rem' }}>My Profile</h2>
+      
+      {/* Profile Picture Section */}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          width: '120px',
+          height: '120px',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          border: '3px solid #764ba2',
+          marginBottom: '1rem',
+          boxShadow: '0 4px 12px rgba(118, 75, 162, 0.2)'
+        }}>
+          <img 
+            src={profilePic} 
+            alt="Profile" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </div>
+        
+        <label htmlFor="profile-pic-upload" style={{
+          backgroundColor: 'white',
+          color: '#764ba2',
+          padding: '8px 20px',
+          borderRadius: '20px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '600',
+          border: '2px solid #764ba2',
+          transition: 'all 0.3s ease',
+          boxShadow: '0 2px 8px rgba(118, 75, 162, 0.1)'
+        }}>
+          Change Photo
+          <input
+            id="profile-pic-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleProfilePicChange}
+            style={{ display: 'none' }}
+          />
+        </label>
+      </div>
+      
+      {/* Profile Info */}
+      <div style={{ 
+        marginBottom: '2rem', 
+        fontSize: '16px', 
+        color: '#333',
+        textAlign: 'center',
+        lineHeight: '1.6'
+      }}>
         <p><strong>Name:</strong> John Zakayo</p>
         <p><strong>Email:</strong> johnzakayo@gmail.com</p>
       </div>
+      
+      {/* Buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <button style={{ backgroundColor: 'red' }}>Delete Account</button>
-        <button style={{ backgroundColor: '#007BFF' }}>Reset Password</button>
+        <button style={{ 
+          backgroundColor: '#764ba2',
+          padding: '12px',
+          borderRadius: '8px',
+          border: 'none',
+          color: 'white',
+          cursor: 'pointer',
+          fontWeight: '600',
+          transition: 'all 0.3s ease',
+          boxShadow: '0 2px 8px rgba(118, 75, 162, 0.2)'
+        }}>
+          Reset Password
+        </button>
+        <button style={{ 
+          backgroundColor: '#f8f9fa',
+          padding: '12px',
+          borderRadius: '8px',
+          border: '1px solid #dc3545',
+          color: '#dc3545',
+          cursor: 'pointer',
+          fontWeight: '600',
+          transition: 'all 0.3s ease'
+        }}>
+          Delete Account
+        </button>
       </div>
     </div>
-  )
-}
-
-
+  );
+};
 const SearchRidesPage = () => {
   return (
     <div className="form-wrapper">
