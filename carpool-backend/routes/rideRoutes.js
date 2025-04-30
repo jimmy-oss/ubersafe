@@ -45,6 +45,10 @@ router.get("/", async (req, res) => {
 
       query.departureTime = { $gte: startOfDay, $lte: endOfDay };
     }
+    if (startLocation) {
+  query.startLocation = { $regex: new RegExp(startLocation, "i") };
+}
+
 
     const rides = await Ride.find(query).populate("driver", "fullName email");
     res.status(200).json(rides);

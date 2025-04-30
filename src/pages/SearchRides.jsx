@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios"; 
 
 const SearchRides = () => {
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
+  const [startLocation, setStartLocation] = useState("");
   const [rides, setRides] = useState([]);
 
   const fetchRides = async () => {
     try {
       const query = [];
+      if (startLocation) query.push(`startLocation=${startLocation}`);
       if (destination) query.push(`destination=${destination}`);
       if (date) query.push(`date=${date}`);
 
       const queryString = query.length ? `?${query.join("&")}` : "";
-      const response = await axios.get(`http://localhost:5000/api/rides${queryString}`);
+      const response = await api.get(`/rides${queryString}`); // ✅ uses baseURL
       setRides(response.data);
     } catch (error) {
       console.error("Failed to fetch rides:", error.message);
@@ -21,7 +23,7 @@ const SearchRides = () => {
   };
 
   useEffect(() => {
-    fetchRides(); // initial load
+    fetchRides(); // Load rides on first render
   }, []);
 
   return (
@@ -42,6 +44,21 @@ const SearchRides = () => {
           onChange={(e) => setDate(e.target.value)}
           className="border p-2 rounded"
         />
+        <input
+  type="text"
+  placeholder="Starting Location"
+  value={startLocation}
+  onChange={(e) => setStartLocation(e.target.value)}
+  className="border p-2 rounded w-full"
+/>
+<input
+  type="text"
+  placeholder="Destination"
+  value={destination}
+  onChange={(e) => setDestination(e.target.value)}
+  className="border p-2 rounded w-full"
+/>
+
         <button
           onClick={fetchRides}
           className="bg-blue-600 text-white px-4 py-2 rounded"
