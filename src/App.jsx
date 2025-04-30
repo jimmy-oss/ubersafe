@@ -3,6 +3,8 @@ import { FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-i
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Confetti from "react-confetti";
+
 
 
 function App() {
@@ -85,46 +87,128 @@ const RegisterPage = () => {
     </div>
   )
 }
-
-
+ 
 const PostRidePage = () => {
+  const [startLocation, setStartLocation] = useState("");
+  const [destination, setDestination] = useState("");
+  const [seats, setSeats] = useState("");
+  const [price, setPrice] = useState("");
   const [startDate, setStartDate] = useState(null);
+  const [error, setError] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!startLocation || !destination || !seats || !price || !startDate) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (parseInt(seats) <= 0 || parseInt(price) <= 0) {
+      setError("Seats and Price must be greater than zero.");
+      return;
+    }
+
+    if (startDate <= new Date()) {
+      setError("Date & Time must be in the future.");
+      return;
+    }
+
+    setError("");
+    setShowConfetti(true);
+    setShowSuccess(true);
+
+    // Hide confetti & message after 5s
+    setTimeout(() => {
+      setShowConfetti(false);
+      setShowSuccess(false);
+    }, 5000);
+
+    // Reset form
+    setStartLocation("");
+    setDestination("");
+    setSeats("");
+    setPrice("");
+    setStartDate(null);
+  };
 
   return (
     <div className="form-wrapper">
+      {showConfetti && <Confetti numberOfPieces={250} recycle={false} />}
+
+      {showSuccess && (
+        <div style={{
+          backgroundColor: "#d4edda",
+          color: "#155724",
+          padding: "1rem",
+          borderRadius: "8px",
+          textAlign: "center",
+          marginBottom: "1.5rem",
+          border: "1px solid #c3e6cb",
+          animation: "fadeIn 0.4s ease"
+        }}>
+          ✅ Ride posted successfully!
+        </div>
+      )}
+
       <h2>Post a Ride</h2>
-      <form>
-  <input type="text" placeholder="Starting Location" />
-  
-  <input type="text" placeholder="Destination" style={{ marginBottom: '0.75rem' }} />
+      {error && (
+        <div style={{ color: "red", marginBottom: "1rem", textAlign: "center" }}>
+          {error}
+        </div>
+      )}
 
-  <label
-    style={{
-      marginBottom: '0.25rem',
-      display: 'block',
-      fontWeight: '600',
-      marginTop: '-0.5rem' 
-    }}
-  >
-    Date & Time
-  </label>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Starting Location"
+          value={startLocation}
+          onChange={(e) => setStartLocation(e.target.value)}
+        />
 
-  <DatePicker
-    selected={startDate}
-    onChange={(date) => setStartDate(date)}
-    showTimeSelect
-    dateFormat="Pp"
-    placeholderText="Select date and time"
-    className="form-input"
-  />
+        <input
+          type="text"
+          placeholder="Destination"
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+          style={{ marginBottom: '0.75rem' }}
+        />
 
-  <input type="number" placeholder="Available Seats" />
-  <input type="number" placeholder="Price per Seat (Ksh)" />
-  <button type="submit">Post Ride</button>
+        <label style={{ marginBottom: "0.25rem", display: "block", fontWeight: "600", marginTop: "-0.5rem" }}>
+          Date & Time
+        </label>
+        <DatePicker
+          selected={startDate}
+          onChange={(date) => setStartDate(date)}
+          showTimeSelect
+          dateFormat="Pp"
+          placeholderText="Select date and time"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          placeholder="Available Seats"
+          value={seats}
+          onChange={(e) => setSeats(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Price per Seat (Ksh)"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+
+        <button type="submit">Post Ride</button>
       </form>
     </div>
-  )
-}
+  );
+};
+
+ 
 
 
 const ProfilePage = () => {
