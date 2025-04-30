@@ -4,6 +4,7 @@
 
 body {
   margin: 0;
+  padding-top: 80px;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #667eea, #764ba2);
   min-height: 100vh;
@@ -127,3 +128,48 @@ input[type="datetime-local"] {
   background-color: #fff;
   color: #333;
 }
+.button-link {
+  display: block;
+  background-color: #764ba2;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+.button-link:hover {
+  background-color: #5a3e91;
+}
+.home-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.home-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #764ba2;
+  color: white;
+  padding: 12px;
+  width: 80%;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  margin: 0 auto;     
+  text-align: center;
+  transition: background 0.3s ease;
+}
+
+.home-card:hover {
+  background-color: #5a3e91;
+  color: white;
+}
+
+ 

@@ -1,10 +1,9 @@
 import { Routes, Route, Link } from 'react-router-dom'
-import { FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-icons/fa';
+import {FaCar,FaSearchLocation,FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-icons/fa';
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Confetti from "react-confetti";
-
 
 
 function App() {
@@ -37,26 +36,32 @@ function App() {
   )
 }
 
+ 
 const HomePage = () => {
   return (
     <div className="form-wrapper">
-      <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '1rem' }}>
-        Welcome to UberSafe
-      </h1>
-      <p style={{ textAlign: 'center', color: '#555', marginBottom: '2rem' }}>
-        Find or offer rides easily and travel smarter.
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <Link to="/search">
-          <button>Search for a Ride</button>
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <FaCar size={48} color="#764ba2" />
+        <h1 style={{ color: '#333', marginTop: '1rem' , fontWeight: 'bold'}}>Welcome to UberSafe</h1>
+        <p style={{ color: '#555', marginTop: '0.5rem' }}>
+          Find or offer rides easily and travel smarter.
+        </p>
+      </div>
+
+      <div className="home-options">
+        <Link to="/search" className="home-card">
+          <FaSearchLocation size={20} />
+          <span>Search for a Ride</span>
         </Link>
-        <Link to="/post-ride">
-          <button>Post a Ride</button>
+
+        <Link to="/post-ride" className="home-card">
+          <FaPlusCircle size={20} />
+          <span>Post a Ride</span>
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
 
 const LoginPage = () => {
