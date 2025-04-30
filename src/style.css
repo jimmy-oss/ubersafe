@@ -228,3 +228,48 @@ button[type="button"]:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
 }
+/* Form Validation Styles */
+.form-group {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 4px;
+  display: block;
+}
+
+input.error {
+  border-color: #dc3545 !important;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-message span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Add to existing animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

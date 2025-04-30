@@ -1,10 +1,9 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import {FaCar,FaSearchLocation,FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-icons/fa';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Confetti from "react-confetti";
-
 
 function App() {
   return (
@@ -63,36 +62,195 @@ const HomePage = () => {
   );
 };
 
-
 const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (success) {
+      timer = setTimeout(() => setSuccess(false), 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [success]);
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {  // Added minimum length validation
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setSuccess(false);
+      return;
+    }
+
+    setErrors({});
+    setSuccess(true);
+  };
+
   return (
     <div className="form-wrapper">
       <h2>Login</h2>
-      <form>
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Password" />
+      {success && (
+        <div className="success-message">
+          <span>✅ Login successful!</span>
+        </div>
+      )}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={errors.email ? 'error' : ''}
+          />
+          {errors.email && <span className="error-message">{errors.email}</span>}
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={errors.password ? 'error' : ''}
+          />
+          {errors.password && <span className="error-message">{errors.password}</span>}
+        </div>
         <button type="submit">Login</button>
       </form>
     </div>
-  )
-}
-
+  );
+};
 
 const RegisterPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(false);
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setSuccess(false);
+      return;
+    }
+
+    // If validation passes (simulate successful registration)
+    setErrors({});
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 3000);
+  };
+
   return (
     <div className="form-wrapper">
       <h2>Register</h2>
-      <form>
-        <input type="text" placeholder="Full Name" />
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Password" />
-        <input type="password" placeholder="Confirm Password" />
+      {success && (
+        <div className="success-message">
+          <span>✅ Registration successful!</span>
+        </div>
+      )}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={handleChange}
+            className={errors.name ? 'error' : ''}
+          />
+          {errors.name && <span className="error-message">{errors.name}</span>}
+        </div>
+        <div className="form-group">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className={errors.email ? 'error' : ''}
+          />
+          {errors.email && <span className="error-message">{errors.email}</span>}
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className={errors.password ? 'error' : ''}
+          />
+          {errors.password && <span className="error-message">{errors.password}</span>}
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className={errors.confirmPassword ? 'error' : ''}
+          />
+          {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+        </div>
         <button type="submit">Register</button>
       </form>
     </div>
-  )
-}
- 
+  );
+};
 const PostRidePage = () => {
   const [startLocation, setStartLocation] = useState("");
   const [destination, setDestination] = useState("");
