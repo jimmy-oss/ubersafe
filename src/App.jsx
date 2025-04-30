@@ -249,7 +249,7 @@ const RegisterPage = () => {
     }
 
     try {
-     const res = await api.post("/auth/register", {
+     const res = await api.post("/register", {
      fullName: formData.name,       // ✅ Backend expects 'fullName'
      email: formData.email,
      password: formData.password,
@@ -260,8 +260,8 @@ const RegisterPage = () => {
       console.log("✅ Registered user:", res.data);
       setSuccess(true);
     } catch (err) {
-      console.error(err.response?.data || err.message);
-      setErrors({ api: err.response?.data?.message || "Registration failed" });
+      console.error("🔥 Registration failed:", err);
+      setErrors({ api: err.response?.data?.message || err.message || "Registration failed" });
     }
   };
 
