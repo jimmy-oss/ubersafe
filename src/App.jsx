@@ -62,18 +62,28 @@ const HomePage = () => {
   );
 };
 
+
+
+
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     let timer;
     if (success) {
-      timer = setTimeout(() => setSuccess(false), 3000);
+      timer = setTimeout(() => {
+        setSuccess(false);
+        resetForm(); // Reset form when success message disappears
+      }, 5000);
     }
-    return () => clearTimeout(timer);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [success]);
 
   const validateEmail = (email) => {
@@ -81,19 +91,32 @@ const LoginPage = () => {
     return re.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      email: '',
+      password: ''
+    });
+    setErrors({});
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    if (!email) {
+    if (!formData.email) {
       newErrors.email = 'Email is required';
-    } else if (!validateEmail(email)) {
+    } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
 
-    if (!password) {
+    if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (password.length < 6) {  // Added minimum length validation
+    } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
@@ -103,8 +126,15 @@ const LoginPage = () => {
       return;
     }
 
-    setErrors({});
-    setSuccess(true);
+    try {
+      // This will be replaced with my actual API call
+      // const response = await axios.post('/api/auth/login', formData);
+      // localStorage.setItem('token', response.data.token);
+      
+      setSuccess(true);
+    } catch (err) {
+      setErrors({ api: err.response?.data?.message || 'Login failed' });
+    }
   };
 
   return (
@@ -112,16 +142,18 @@ const LoginPage = () => {
       <h2>Login</h2>
       {success && (
         <div className="success-message">
-          <span>✅ Login successful!</span>
+          <span>✅ Login successful! Redirecting...</span>
         </div>
       )}
+      {errors.api && <div className="error-message">{errors.api}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <input
             type="email"
+            name="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
             className={errors.email ? 'error' : ''}
           />
           {errors.email && <span className="error-message">{errors.email}</span>}
@@ -129,9 +161,10 @@ const LoginPage = () => {
         <div className="form-group">
           <input
             type="password"
+            name="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             className={errors.password ? 'error' : ''}
           />
           {errors.password && <span className="error-message">{errors.password}</span>}
@@ -152,6 +185,19 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    let timer;
+    if (success) {
+      timer = setTimeout(() => {
+        setSuccess(false);
+        resetForm();
+      }, 5000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [success]);
+
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
@@ -162,7 +208,17 @@ const RegisterPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setErrors({});
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -187,10 +243,13 @@ const RegisterPage = () => {
       return;
     }
 
-    // If validation passes (simulate successful registration)
-    setErrors({});
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    try {
+      // This will be replaced with my actual API call
+      // const response = await axios.post('/api/auth/register', formData);
+      setSuccess(true);
+    } catch (err) {
+      setErrors({ api: err.response?.data?.message || 'Registration failed' });
+    }
   };
 
   return (
@@ -198,9 +257,10 @@ const RegisterPage = () => {
       <h2>Register</h2>
       {success && (
         <div className="success-message">
-          <span>✅ Registration successful!</span>
+          <span>✅ Registration successful! You can now login.</span>
         </div>
       )}
+      {errors.api && <div className="error-message">{errors.api}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <input
@@ -251,7 +311,9 @@ const RegisterPage = () => {
     </div>
   );
 };
-const PostRidePage = () => {
+
+
+  const PostRidePage = () => {
   const [startLocation, setStartLocation] = useState("");
   const [destination, setDestination] = useState("");
   const [seats, setSeats] = useState("");
