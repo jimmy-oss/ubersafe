@@ -27,11 +27,31 @@ router.post("/", protect, async (req, res) => {
 // GET /api/rides
 router.get("/", async (req, res) => {
   try {
-    const rides = await Ride.find().populate("driver", "fullName email");
+    const { destination, date } = req.query;
+
+    // Build query object
+    let query = {};
+
+    if (destination) {
+      query.destination = { $regex: new RegExp(destination, "i") }; // case-insensitive
+    }
+
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      query.departureTime = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    const rides = await Ride.find(query).populate("driver", "fullName email");
     res.status(200).json(rides);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch rides", error: error.message });
+    res.status(500).json({ message: "Failed to filter rides", error: error.message });
   }
 });
+
 
 export default router;
