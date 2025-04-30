@@ -13,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // this comes before the routes
 
+
 // Routes
 app.use("/api", authRoutes);
 app.use("/api/rides", rideRoutes);

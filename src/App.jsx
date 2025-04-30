@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Confetti from "react-confetti";
+import api from "./api/axios";
 
 function App() {
   return (
@@ -175,13 +176,17 @@ const LoginPage = () => {
   );
 };
 
+
+ 
+
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
   });
+
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
@@ -210,10 +215,10 @@ const RegisterPage = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
     });
     setErrors({});
   };
@@ -222,19 +227,19 @@ const RegisterPage = () => {
     e.preventDefault();
     const newErrors = {};
 
-    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.name) newErrors.name = "Name is required";
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = "Please enter a valid email";
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -244,11 +249,19 @@ const RegisterPage = () => {
     }
 
     try {
-      // This will be replaced with my actual API call
-      // const response = await axios.post('/api/auth/register', formData);
+     const res = await api.post("/auth/register", {
+     fullName: formData.name,       // ✅ Backend expects 'fullName'
+     email: formData.email,
+     password: formData.password,
+     isDriver: true                // or true if they’re registering as a driver
+    });
+      
+
+      console.log("✅ Registered user:", res.data);
       setSuccess(true);
     } catch (err) {
-      setErrors({ api: err.response?.data?.message || 'Registration failed' });
+      console.error(err.response?.data || err.message);
+      setErrors({ api: err.response?.data?.message || "Registration failed" });
     }
   };
 
@@ -269,7 +282,7 @@ const RegisterPage = () => {
             placeholder="Full Name"
             value={formData.name}
             onChange={handleChange}
-            className={errors.name ? 'error' : ''}
+            className={errors.name ? "error" : ""}
           />
           {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
@@ -280,7 +293,7 @@ const RegisterPage = () => {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className={errors.email ? 'error' : ''}
+            className={errors.email ? "error" : ""}
           />
           {errors.email && <span className="error-message">{errors.email}</span>}
         </div>
@@ -291,7 +304,7 @@ const RegisterPage = () => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className={errors.password ? 'error' : ''}
+            className={errors.password ? "error" : ""}
           />
           {errors.password && <span className="error-message">{errors.password}</span>}
         </div>
@@ -302,9 +315,11 @@ const RegisterPage = () => {
             placeholder="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={errors.confirmPassword ? 'error' : ''}
+            className={errors.confirmPassword ? "error" : ""}
           />
-          {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+          {errors.confirmPassword && (
+            <span className="error-message">{errors.confirmPassword}</span>
+          )}
         </div>
         <button type="submit">Register</button>
       </form>
