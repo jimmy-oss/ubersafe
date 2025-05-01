@@ -262,7 +262,7 @@ input.error {
   gap: 8px;
 }
 
-/* Add to existing animations */
+/* Adding to existing animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -4,7 +4,7 @@ import Ride from "../models/Ride.js";
 
 const router = express.Router();
 
-// POST /api/rides (Only accessible to logged-in drivers)
+// POST /api/rides (Driver only)
 router.post("/", protect, async (req, res) => {
   const { startLocation, destination, departureTime, availableSeats, price } = req.body;
 
@@ -25,11 +25,10 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-// GET /api/rides (Public - filter by startLocation, destination, and date)
+// GET /api/rides
 router.get("/", async (req, res) => {
   try {
     const { destination, date, startLocation } = req.query;
-
     let query = {};
 
     if (destination) {
@@ -43,10 +42,8 @@ router.get("/", async (req, res) => {
     if (date) {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
-
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
-
       query.departureTime = { $gte: startOfDay, $lte: endOfDay };
     }
 
@@ -54,6 +51,25 @@ router.get("/", async (req, res) => {
     res.status(200).json(rides);
   } catch (error) {
     res.status(500).json({ message: "Failed to filter rides", error: error.message });
+  }
+});
+
+// ✅ NEW: Book a ride
+router.post("/:id/book", protect, async (req, res) => {
+  try {
+    const ride = await Ride.findById(req.params.id);
+    if (!ride) return res.status(404).json({ message: "Ride not found" });
+
+    if (ride.availableSeats <= 0) {
+      return res.status(400).json({ message: "No seats available" });
+    }
+
+    ride.availableSeats -= 1;
+    await ride.save();
+
+    res.status(200).json({ message: "Booking successful", ride });
+  } catch (error) {
+    res.status(500).json({ message: "Booking failed", error: error.message });
   }
 });
 
