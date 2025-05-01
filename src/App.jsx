@@ -582,8 +582,9 @@ const LoginPage = () => {
         <DatePicker
           selected={date}
           onChange={(d) => setDate(d)}
-          dateFormat="yyyy-MM-dd"
-          placeholderText="Select Date"
+          showTimeSelect
+          dateFormat="Pp"
+          placeholderText="Select date and time"
           className="form-input"
         />
         <button type="submit">Search</button>
@@ -630,7 +631,14 @@ const LoginPage = () => {
             </p>
             <p>
               <strong>Date & Time:</strong>{" "}
-              {new Date(ride.departureTime).toLocaleString()}
+              {new Date(ride.departureTime).toLocaleString('en-US', {
+               year: 'numeric',
+               month: 'numeric',
+               day: 'numeric',
+               hour: 'numeric',
+               minute: 'numeric',
+               hour12: true
+             })}
             </p>
             <p>
               <strong>Seats:</strong> {ride.availableSeats}
