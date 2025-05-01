@@ -4,7 +4,7 @@ import Ride from "../models/Ride.js";
 
 const router = express.Router();
 
-// POST /api/rides
+// POST /api/rides (Only accessible to logged-in drivers)
 router.post("/", protect, async (req, res) => {
   const { startLocation, destination, departureTime, availableSeats, price } = req.body;
 
@@ -24,16 +24,20 @@ router.post("/", protect, async (req, res) => {
     res.status(500).json({ message: "Failed to post ride", error: error.message });
   }
 });
-// GET /api/rides
+
+// GET /api/rides (Public - filter by startLocation, destination, and date)
 router.get("/", async (req, res) => {
   try {
-    const { destination, date } = req.query;
+    const { destination, date, startLocation } = req.query;
 
-    // Build query object
     let query = {};
 
     if (destination) {
-      query.destination = { $regex: new RegExp(destination, "i") }; // case-insensitive
+      query.destination = { $regex: new RegExp(destination, "i") };
+    }
+
+    if (startLocation) {
+      query.startLocation = { $regex: new RegExp(startLocation, "i") };
     }
 
     if (date) {
@@ -45,10 +49,6 @@ router.get("/", async (req, res) => {
 
       query.departureTime = { $gte: startOfDay, $lte: endOfDay };
     }
-    if (startLocation) {
-  query.startLocation = { $regex: new RegExp(startLocation, "i") };
-}
-
 
     const rides = await Ride.find(query).populate("driver", "fullName email");
     res.status(200).json(rides);
@@ -56,6 +56,5 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Failed to filter rides", error: error.message });
   }
 });
-
 
 export default router;

@@ -290,11 +290,6 @@ const LoginPage = () => {
 
 
 
- 
-  
-         
-
-
   const PostRidePage = () => {
   const [startLocation, setStartLocation] = useState("");
   const [destination, setDestination] = useState("");
@@ -529,19 +524,130 @@ const LoginPage = () => {
     </div>
   );
 };
-const SearchRidesPage = () => {
+ const SearchRidesPage = () => {
+  const [startLocation, setStartLocation] = useState("");
+  const [destination, setDestination] = useState("");
+  const [date, setDate] = useState(null);
+  const [rides, setRides] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchRides = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const params = {};
+      if (startLocation) params.startLocation = startLocation;
+      if (destination) params.destination = destination;
+      if (date?.toISOString) {
+        params.date = date.toISOString().split("T")[0]; // Format: yyyy-mm-dd
+      }
+
+      const res = await api.get("/rides", { params });
+      setRides(res.data);
+    } catch (err) {
+      console.error("Error fetching rides:", err);
+      setError("Failed to fetch rides");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRides(); // Load all rides on page load
+  }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchRides();
+  };
+
   return (
     <div className="form-wrapper">
       <h2>Search for a Ride</h2>
-      <form>
-        <input type="text" placeholder="Starting Location" />
-        <input type="text" placeholder="Destination" />
+      <form onSubmit={handleSearch}>
+        <input
+          type="text"
+          placeholder="Starting Location"
+          value={startLocation}
+          onChange={(e) => setStartLocation(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Destination"
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+        />
+        <DatePicker
+          selected={date}
+          onChange={(d) => setDate(d)}
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Select Date"
+          className="form-input"
+        />
         <button type="submit">Search</button>
       </form>
-    </div>
-  )
-}
 
+      {loading && <p style={{ textAlign: "center" }}>Loading rides...</p>}
+      {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+
+      {!loading && !error && rides.length === 0 && (
+  <div
+    style={{
+      backgroundColor: "#ffe5e5",
+      color: "#a94442",
+      border: "1px solid #f5c6cb",
+      padding: "1rem",
+      borderRadius: "8px",
+      marginTop: "1.5rem",
+      textAlign: "center",
+      fontWeight: "600"
+    }}
+  >
+    🚫 No rides found. Try a different location or date.
+  </div>
+)}
+
+      <div style={{ marginTop: "2rem" }}>
+        {rides.map((ride) => (
+          <div
+            key={ride._id}
+            style={{
+              background: "#f9f9f9",
+              color: "#333",
+              border: "1px solid #ddd",
+              padding: "1rem",
+              borderRadius: "8px",
+              marginBottom: "1rem"
+            }}
+          >
+            <p>
+              <strong>From:</strong> {ride.startLocation}
+            </p>
+            <p>
+              <strong>To:</strong> {ride.destination}
+            </p>
+            <p>
+              <strong>Date & Time:</strong>{" "}
+              {new Date(ride.departureTime).toLocaleString()}
+            </p>
+            <p>
+              <strong>Seats:</strong> {ride.availableSeats}
+            </p>
+            <p>
+              <strong>Price:</strong> Ksh {ride.price}
+            </p>
+            <p>
+              <strong>Driver:</strong> {ride.driver?.fullName} ({ride.driver?.email})
+            </p>
+            <button style={{ marginTop: "0.5rem" }}>Book Ride</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
  
  
