@@ -1,10 +1,13 @@
 import { Routes, Route, Link } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 import {FaCar,FaSearchLocation,FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-icons/fa';
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Confetti from "react-confetti";
 import api from "./api/axios";
+ 
+
 
 function App() {
   return (
@@ -65,74 +68,22 @@ const HomePage = () => {
 
 
 
-
 const LoginPage = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    let timer;
-    if (success) {
-      timer = setTimeout(() => {
-        setSuccess(false);
-        resetForm(); // Reset form when success message disappears
-      }, 5000);
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [success]);
-
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      email: '',
-      password: ''
-    });
-    setErrors({});
-  };
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setSuccess(false);
-      return;
-    }
-
+    if (!formData.email || !formData.password) return setErrors({ api: 'Email and password required' });
     try {
-      // This will be replaced with my actual API call
-      // const response = await axios.post('/api/auth/login', formData);
-      // localStorage.setItem('token', response.data.token);
-      
+      const res = await api.post('/login', formData);
+      const { isDriver } = res.data.user;
       setSuccess(true);
+      setTimeout(() => navigate(isDriver ? '/post-ride' : '/search'), 2000);
     } catch (err) {
       setErrors({ api: err.response?.data?.message || 'Login failed' });
     }
@@ -141,35 +92,11 @@ const LoginPage = () => {
   return (
     <div className="form-wrapper">
       <h2>Login</h2>
-      {success && (
-        <div className="success-message">
-          <span>✅ Login successful! Redirecting...</span>
-        </div>
-      )}
+      {success && <div className="success-message">✅ Login successful! Redirecting...</div>}
       {errors.api && <div className="error-message">{errors.api}</div>}
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className={errors.email ? 'error' : ''}
-          />
-          {errors.email && <span className="error-message">{errors.email}</span>}
-        </div>
-        <div className="form-group">
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className={errors.password ? 'error' : ''}
-          />
-          {errors.password && <span className="error-message">{errors.password}</span>}
-        </div>
+        <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+        <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
         <button type="submit">Login</button>
       </form>
     </div>
@@ -177,14 +104,15 @@ const LoginPage = () => {
 };
 
 
- 
+ const RegisterPage = () => {
+  const navigate = useNavigate();
 
-const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "rider"
   });
 
   const [errors, setErrors] = useState({});
@@ -196,21 +124,25 @@ const RegisterPage = () => {
       timer = setTimeout(() => {
         setSuccess(false);
         resetForm();
-      }, 5000);
+
+        // redirect after 1s
+        if (formData.role === "driver") {
+          navigate("/post-ride");
+        } else {
+          navigate("/login");
+        }
+      }, 1000);
     }
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [success]);
+  }, [formData.role, navigate, success]);
 
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {
@@ -218,7 +150,8 @@ const RegisterPage = () => {
       name: "",
       email: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+      role: "rider"
     });
     setErrors({});
   };
@@ -244,24 +177,26 @@ const RegisterPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setSuccess(false);
       return;
     }
 
     try {
-     const res = await api.post("/register", {
-     fullName: formData.name,       // ✅ Backend expects 'fullName'
-     email: formData.email,
-     password: formData.password,
-     isDriver: true                // or true if they’re registering as a driver
-    });
-      
+      const res = await api.post("/register", {
+        fullName: formData.name,
+        email: formData.email,
+        password: formData.password,
+        isDriver: formData.role === "driver"
+      });
 
-      console.log("✅ Registered user:", res.data);
+      console.log("✅ Registered:", res.data);
       setSuccess(true);
     } catch (err) {
-      console.error("🔥 Registration failed:", err);
-      setErrors({ api: err.response?.data?.message || err.message || "Registration failed" });
+      setErrors({
+        api:
+          err.response?.data?.message ||
+          err.message ||
+          "Registration failed"
+      });
     }
   };
 
@@ -270,10 +205,11 @@ const RegisterPage = () => {
       <h2>Register</h2>
       {success && (
         <div className="success-message">
-          <span>✅ Registration successful! You can now login.</span>
+          <span>✅ Registration successful! Redirecting...</span>
         </div>
       )}
       {errors.api && <div className="error-message">{errors.api}</div>}
+
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <input
@@ -284,8 +220,11 @@ const RegisterPage = () => {
             onChange={handleChange}
             className={errors.name ? "error" : ""}
           />
-          {errors.name && <span className="error-message">{errors.name}</span>}
+          {errors.name && (
+            <span className="error-message">{errors.name}</span>
+          )}
         </div>
+
         <div className="form-group">
           <input
             type="email"
@@ -295,8 +234,11 @@ const RegisterPage = () => {
             onChange={handleChange}
             className={errors.email ? "error" : ""}
           />
-          {errors.email && <span className="error-message">{errors.email}</span>}
+          {errors.email && (
+            <span className="error-message">{errors.email}</span>
+          )}
         </div>
+
         <div className="form-group">
           <input
             type="password"
@@ -306,8 +248,11 @@ const RegisterPage = () => {
             onChange={handleChange}
             className={errors.password ? "error" : ""}
           />
-          {errors.password && <span className="error-message">{errors.password}</span>}
+          {errors.password && (
+            <span className="error-message">{errors.password}</span>
+          )}
         </div>
+
         <div className="form-group">
           <input
             type="password"
@@ -318,14 +263,36 @@ const RegisterPage = () => {
             className={errors.confirmPassword ? "error" : ""}
           />
           {errors.confirmPassword && (
-            <span className="error-message">{errors.confirmPassword}</span>
+            <span className="error-message">
+              {errors.confirmPassword}
+            </span>
           )}
         </div>
+
+        <div className="form-group">
+          <label style={{ fontWeight: "600" }}>Register As:</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="form-input"
+          >
+            <option value="rider">Rider</option>
+            <option value="driver">Driver</option>
+          </select>
+        </div>
+
         <button type="submit">Register</button>
       </form>
     </div>
   );
 };
+
+
+
+ 
+  
+         
 
 
   const PostRidePage = () => {
