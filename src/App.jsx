@@ -1,6 +1,17 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-import {FaCar,FaSearchLocation,FaCarSide, FaUserAlt, FaSignInAlt, FaPlusCircle, FaHome } from 'react-icons/fa';
+import {
+  FaCar,
+  FaSearchLocation,
+  FaCarSide,
+  FaUserAlt,
+  FaSignInAlt,
+  FaPlusCircle, 
+  FaHome,
+  FaTrash,
+  FaEdit,
+  FaUsers
+} from 'react-icons/fa';
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -297,9 +308,7 @@ const LoginPage = () => {
   );
 };
 
-
-
-  const PostRidePage = () => {
+ const PostRidePage = () => {
   const [startLocation, setStartLocation] = useState("");
   const [destination, setDestination] = useState("");
   const [seats, setSeats] = useState("");
@@ -308,41 +317,104 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [rides, setRides] = useState([]);
+  const [editingRideId, setEditingRideId] = useState(null);
 
-  const handleSubmit = (e) => {
+  const fetchMyRides = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await api.get("/rides/my", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRides(res.data);
+    } catch (err) {
+      console.error("Error fetching rides:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyRides();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!startLocation || !destination || !seats || !price || !startDate) {
       setError("All fields are required.");
       return;
     }
-
     if (parseInt(seats) <= 0 || parseInt(price) <= 0) {
       setError("Seats and Price must be greater than zero.");
       return;
     }
-
     if (startDate <= new Date()) {
       setError("Date & Time must be in the future.");
       return;
     }
 
-    setError("");
-    setShowConfetti(true);
-    setShowSuccess(true);
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        startLocation,
+        destination,
+        departureTime: startDate,
+        availableSeats: seats,
+        price,
+      };
 
-    // Hide confetti & message after 5s
-    setTimeout(() => {
-      setShowConfetti(false);
-      setShowSuccess(false);
-    }, 5000);
+      if (editingRideId) {
+        await api.put(`/rides/${editingRideId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await api.post("/rides", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
-    // Reset form
+      setShowConfetti(true);
+      setShowSuccess(true);
+      fetchMyRides();
+      setTimeout(() => {
+        setShowConfetti(false);
+        setShowSuccess(false);
+      }, 5000);
+      resetForm();
+    } catch (err) {
+      setError("Failed to post/update ride");
+    }
+  };
+
+  const resetForm = () => {
     setStartLocation("");
     setDestination("");
     setSeats("");
     setPrice("");
     setStartDate(null);
+    setEditingRideId(null);
+    setError("");
+  };
+
+  const handleEdit = (ride) => {
+    setEditingRideId(ride._id);
+    setStartLocation(ride.startLocation);
+    setDestination(ride.destination);
+    setSeats(ride.availableSeats);
+    setPrice(ride.price);
+    setStartDate(new Date(ride.departureTime));
+  };
+
+  const handleDelete = async (rideId) => {
+    if (!window.confirm("Are you sure you want to delete this ride?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/rides/${rideId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchMyRides();
+    } catch (err) {
+      console.error("Failed to delete ride", err);
+    }
   };
 
   return (
@@ -360,66 +432,57 @@ const LoginPage = () => {
           border: "1px solid #c3e6cb",
           animation: "fadeIn 0.4s ease"
         }}>
-          ✅ Ride posted successfully!
+          ✅ Ride {editingRideId ? 'updated' : 'posted'} successfully!
         </div>
       )}
 
-      <h2>Post a Ride</h2>
-      {error && (
-        <div style={{ color: "red", marginBottom: "1rem", textAlign: "center" }}>
-          {error}
-        </div>
-      )}
+      <h2>{editingRideId ? "Edit Ride" : "Post a Ride"}</h2>
+      {error && <div style={{ color: "red", marginBottom: "1rem", textAlign: "center" }}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Starting Location"
-          value={startLocation}
-          onChange={(e) => setStartLocation(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="Destination"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          style={{ marginBottom: '0.75rem' }}
-        />
-
-        <label style={{ marginBottom: "0.25rem", display: "block", fontWeight: "600", marginTop: "-0.5rem" }}>
-          Date & Time
-        </label>
-        <DatePicker
-          selected={startDate}
-          onChange={(date) => setStartDate(date)}
-          showTimeSelect
-          dateFormat="Pp"
-          placeholderText="Select date and time"
-          className="form-input"
-        />
-
-        <input
-          type="number"
-          placeholder="Available Seats"
-          value={seats}
-          onChange={(e) => setSeats(e.target.value)}
-        />
-
-        <input
-          type="number"
-          placeholder="Price per Seat (Ksh)"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-
-        <button type="submit">Post Ride</button>
+        <input type="text" placeholder="Starting Location" value={startLocation} onChange={(e) => setStartLocation(e.target.value)} />
+        <input type="text" placeholder="Destination" value={destination} onChange={(e) => setDestination(e.target.value)} />
+        <label style={{ marginTop: "0.5rem" }}>Date & Time</label>
+        <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} showTimeSelect dateFormat="Pp" placeholderText="Select date and time" className="form-input" />
+        <input type="number" placeholder="Available Seats" value={seats} onChange={(e) => setSeats(e.target.value)} />
+        <input type="number" placeholder="Price per Seat (Ksh)" value={price} onChange={(e) => setPrice(e.target.value)} />
+        <button type="submit">{editingRideId ? "Update Ride" : "Post Ride"}</button>
+        {editingRideId && <button type="button" onClick={resetForm} style={{ marginLeft: '1rem' }}>Cancel Edit</button>}
       </form>
+
+      <h3 style={{ marginTop: "2rem" }}>My Posted Rides</h3>
+      {rides.map((ride) => (
+        <div key={ride._id} style={{
+          border: "1px solid #ccc",
+          padding: "1rem",
+          borderRadius: "8px",
+          marginBottom: "1rem",
+          backgroundColor: "#f9f9f9"
+        }}>
+          <p><strong>From:</strong> {ride.startLocation}</p>
+          <p><strong>To:</strong> {ride.destination}</p>
+          <p><strong>Date:</strong> {new Date(ride.departureTime).toLocaleString()}</p>
+          <p><strong>Seats:</strong> {ride.availableSeats}</p>
+          <p><strong>Price:</strong> Ksh {ride.price}</p>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+            <button onClick={() => handleEdit(ride)} style={{ backgroundColor: '#ffc107' }}><FaEdit /> Edit</button>
+            <button onClick={() => handleDelete(ride._id)} style={{ backgroundColor: '#dc3545', color: 'white' }}><FaTrash /> Delete</button>
+          </div>
+          {ride.bookedBy?.length > 0 && (
+            <div style={{ marginTop: '1rem' }}>
+              <strong><FaUsers /> Booked By:</strong>
+              <ul>
+                {ride.bookedBy.map((rider) => (
+                  <li key={rider._id}>{rider.fullName} ({rider.email})</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
-
- 
 
 
  const ProfilePage = () => {
@@ -647,7 +710,7 @@ const SearchRidesPage = () => {
                     placeholder="Seats"
                     value={bookingSeats[ride._id] || ""}
                     onChange={(e) => setBookingSeats({ ...bookingSeats, [ride._id]: e.target.value })}
-                    style={{ width: "80px", marginRight: "8px" }}
+                    style={{ width: "80px", marginRight: "8px",backgroundColor: "#fff", color: "#333", padding: "10px", border: "none",borderRadius: "6px",fontWeight: '600',}}
                   />
                   <button
                     onClick={() => handleBook(ride._id)}
@@ -667,6 +730,6 @@ const SearchRidesPage = () => {
     </div>
   );
 };[
-  
+
 ]
 export default App;
