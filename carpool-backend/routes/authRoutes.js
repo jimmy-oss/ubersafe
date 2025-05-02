@@ -3,8 +3,22 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import jwt from 'jsonwebtoken';
 import protect from "../middleware/auth.js";
-
 const router = express.Router();
+
+// Update profile picture
+router.put('/profile-pic', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.profilePic = req.body.profilePic;
+    await user.save();
+
+    res.status(200).json({ message: 'Profile picture updated', profilePic: user.profilePic });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update profile picture', error: error.message });
+  }
+});
 
 // Register Route
 router.post("/register", async (req, res) => {
@@ -32,6 +46,7 @@ router.post("/register", async (req, res) => {
       fullName: savedUser.fullName,
       email: savedUser.email,
       isDriver: savedUser.isDriver,
+      profilePic: savedUser.profilePic,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });

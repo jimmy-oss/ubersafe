@@ -68,9 +68,9 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/post-ride" element={<PostRidePage />} />
+        <Route path="/post-ride" element={<ProtectedRoute role="driver"><PostRidePage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/search" element={<SearchRidesPage />} />
+        <Route path="/search" element={<ProtectedRoute role="rider"><SearchRidesPage /></ProtectedRoute>} />
       </Routes>
     </div>
   )
@@ -78,29 +78,32 @@ function App() {
  
 const HomePage = () => {
   return (
-    <div className="form-wrapper">
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <FaCar size={48} color="#764ba2" />
-        <h1 style={{ color: '#333', marginTop: '1rem' , fontWeight: 'bold'}}>Welcome to UberSafe</h1>
-        <p style={{ color: '#555', marginTop: '0.5rem' }}>
-          Find or offer rides easily and travel smarter.
-        </p>
-      </div>
+    <div className="homepage-bg">
+      <div className="form-wrapper homepage-content">
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <FaCar size={48} color="#764ba2" />
+          <h1 style={{ color: '#333', marginTop: '1rem', fontWeight: 'bold' }}>Welcome to UberSafe</h1>
+          <p style={{ color: '#555', marginTop: '0.5rem' }}>
+            Find or offer rides easily and travel smarter.
+          </p>
+        </div>
 
-      <div className="home-options">
-        <Link to="/search" className="home-card">
-          <FaSearchLocation size={20} />
-          <span>Search for a Ride</span>
-        </Link>
+        <div className="home-options">
+          <Link to="/search" className="home-card">
+            <FaSearchLocation size={20} />
+            <span>Search for a Ride</span>
+          </Link>
 
-        <Link to="/post-ride" className="home-card">
-          <FaPlusCircle size={20} />
-          <span>Post a Ride</span>
-        </Link>
+          <Link to="/post-ride" className="home-card">
+            <FaPlusCircle size={20} />
+            <span>Post a Ride</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
+
 
 
 
@@ -121,7 +124,7 @@ const LoginPage = () => {
       const { token, user } = res.data;
 
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       setSuccess(true);
       setTimeout(() => {
@@ -515,112 +518,103 @@ const LoginPage = () => {
   );
 };
 
-
- const ProfilePage = () => {
+  const ProfilePage = () => {
+  const navigate = useNavigate();
   const [profilePic, setProfilePic] = useState('https://www.gravatar.com/avatar/default?s=200');
+  const [user, setUser] = useState(null);
 
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePic(reader.result);
-      };
-      reader.readAsDataURL(file);
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser) return navigate("/login");
+    setUser(storedUser);
+    setProfilePic(storedUser.profilePic || profilePic);
+  }, []);
+
+  const handleProfilePicChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const cloudName = import.meta.env.VITE_CLOUDINARY_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_PRESET;
+  formData.append("upload_preset", uploadPreset);
+
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    if (!data.secure_url) throw new Error("Upload failed");
+
+    setProfilePic(data.secure_url);
+
+    const token = localStorage.getItem("token");
+    await api.put("/users/profile-pic", { profilePic: data.secure_url }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const updatedUser = { ...user, profilePic: data.secure_url };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  } catch (err) {
+    console.error(err);
+    alert("Failed to upload profile picture");
+  }
+};
+
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete your account?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete("/users/delete", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      localStorage.clear();
+      navigate("/register");
+    } catch (err) {
+      alert("Failed to delete account",err);
     }
   };
 
   return (
     <div className="form-wrapper">
       <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '1.5rem' }}>My Profile</h2>
-      
+
       {/* Profile Picture Section */}
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        marginBottom: '2rem'
-      }}>
-        <div style={{
-          width: '120px',
-          height: '120px',
-          borderRadius: '50%',
-          overflow: 'hidden',
-          border: '3px solid #764ba2',
-          marginBottom: '1rem',
-          boxShadow: '0 4px 12px rgba(118, 75, 162, 0.2)'
-        }}>
-          <img 
-            src={profilePic} 
-            alt="Profile" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+        <div style={{ width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #764ba2', marginBottom: '1rem', boxShadow: '0 4px 12px rgba(118, 75, 162, 0.2)' }}>
+          <img src={profilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
-        
-        <label htmlFor="profile-pic-upload" style={{
-          backgroundColor: 'white',
-          color: '#764ba2',
-          padding: '8px 20px',
-          borderRadius: '20px',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: '600',
-          border: '2px solid #764ba2',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 2px 8px rgba(118, 75, 162, 0.1)'
-        }}>
+        <label htmlFor="profile-pic-upload" style={{ backgroundColor: 'white', color: '#764ba2', padding: '8px 20px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', border: '2px solid #764ba2', transition: 'all 0.3s ease', boxShadow: '0 2px 8px rgba(118, 75, 162, 0.1)' }}>
           Change Photo
-          <input
-            id="profile-pic-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleProfilePicChange}
-            style={{ display: 'none' }}
-          />
+          <input id="profile-pic-upload" type="file" accept="image/*" onChange={handleProfilePicChange} style={{ display: 'none' }} />
         </label>
       </div>
-      
+
       {/* Profile Info */}
-      <div style={{ 
-        marginBottom: '2rem', 
-        fontSize: '16px', 
-        color: '#333',
-        textAlign: 'center',
-        lineHeight: '1.6'
-      }}>
-        <p><strong>Name:</strong> John Zakayo</p>
-        <p><strong>Email:</strong> johnzakayo@gmail.com</p>
+      <div style={{ marginBottom: '2rem', fontSize: '16px', color: '#333', textAlign: 'center', lineHeight: '1.6' }}>
+        <p><strong>Name:</strong> {user?.fullName}</p>
+        <p><strong>Email:</strong> {user?.email}</p>
+        <p><strong>Role:</strong> {user?.isDriver ? "Driver" : "Rider"}</p>
       </div>
-      
+
       {/* Buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <button style={{ 
-          backgroundColor: '#764ba2',
-          padding: '12px',
-          borderRadius: '8px',
-          border: 'none',
-          color: 'white',
-          cursor: 'pointer',
-          fontWeight: '600',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 2px 8px rgba(118, 75, 162, 0.2)'
-        }}>
-          Reset Password
+        <button onClick={handleLogout} style={{ backgroundColor: '#764ba2', padding: '12px', borderRadius: '8px', border: 'none', color: 'white', cursor: 'pointer', fontWeight: '600', transition: 'all 0.3s ease', boxShadow: '0 2px 8px rgba(118, 75, 162, 0.2)' }}>
+          Logout
         </button>
-        <button style={{ 
-          backgroundColor: '#f8f9fa',
-          padding: '12px',
-          borderRadius: '8px',
-          border: '1px solid #dc3545',
-          color: '#dc3545',
-          cursor: 'pointer',
-          fontWeight: '600',
-          transition: 'all 0.3s ease'
-        }}>
+        <button onClick={handleDelete} style={{ backgroundColor: '#f8f9fa', padding: '12px', borderRadius: '8px', border: '1px solid #dc3545', color: '#dc3545', cursor: 'pointer', fontWeight: '600', transition: 'all 0.3s ease' }}>
           Delete Account
         </button>
       </div>
