@@ -78,17 +78,25 @@ const LoginPage = () => {
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) return setErrors({ api: 'Email and password required' });
-    try {
-      const res = await api.post('/login', formData);
-      const { isDriver } = res.data.user;
-      setSuccess(true);
-      setTimeout(() => navigate(isDriver ? '/post-ride' : '/search'), 2000);
-    } catch (err) {
-      setErrors({ api: err.response?.data?.message || 'Login failed' });
-    }
-  };
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    return setErrors({ api: 'Email and password required' });
+  }
+
+  try {
+    const res = await api.post('/login', formData);
+    const { isDriver, token } = res.data;
+
+    // ✅ Save the token to localStorage
+    localStorage.setItem("token", token);
+
+    setSuccess(true);
+    setTimeout(() => navigate(isDriver ? '/post-ride' : '/search'), 2000);
+  } catch (err) {
+    setErrors({ api: err.response?.data?.message || 'Login failed' });
+  }
+};
+
 
   return (
     <div className="form-wrapper">
@@ -525,7 +533,7 @@ const LoginPage = () => {
     </div>
   );
 };
- const SearchRidesPage = () => {
+const SearchRidesPage = () => {
   const [startLocation, setStartLocation] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState(null);
@@ -534,6 +542,8 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [confettiKey, setConfettiKey] = useState(0);
+  const [bookedRides, setBookedRides] = useState({});
+  const [bookingSeats, setBookingSeats] = useState({});
 
   const fetchRides = async () => {
     setLoading(true);
@@ -545,7 +555,6 @@ const LoginPage = () => {
       if (date?.toISOString) {
         params.date = date.toISOString().split("T")[0];
       }
-
       const res = await api.get("/rides", { params });
       setRides(res.data);
     } catch (err) {
@@ -556,7 +565,7 @@ const LoginPage = () => {
   };
 
   useEffect(() => {
-    fetchRides(); // Initial load
+    fetchRides();
   }, []);
 
   const handleSearch = (e) => {
@@ -565,22 +574,19 @@ const LoginPage = () => {
   };
 
   const handleBook = async (rideId) => {
+    const seatsToBook = parseInt(bookingSeats[rideId]) || 1;
     try {
-      const res = await api.post(`/rides/${rideId}/book`);
-      // Update UI with new ride data
-      setRides((prev) =>
-        prev.map((ride) =>
-          ride._id === rideId
-            ? { ...ride, availableSeats: ride.availableSeats - 1 }
-            : ride
-        )
-      );
+      const token = localStorage.getItem("token");
+      await api.post("/rides/book", { rideId, seats: seatsToBook }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBookedRides(prev => ({ ...prev, [rideId]: true }));
       setShowSuccess(true);
-      setConfettiKey((prev) => prev + 1); // refresh confetti
-
+      setConfettiKey(Date.now());
+      fetchRides();
       setTimeout(() => setShowSuccess(false), 4000);
     } catch (err) {
-      alert("Booking failed: " + (err.response?.data?.message || "Server error"));
+      alert("❌ Booking failed: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -588,18 +594,8 @@ const LoginPage = () => {
     <div className="form-wrapper">
       {showSuccess && (
         <>
-          <Confetti key={confettiKey} numberOfPieces={200} recycle={false} />
-          <div
-            style={{
-              backgroundColor: "#d4edda",
-              color: "#155724",
-              padding: "1rem",
-              borderRadius: "8px",
-              textAlign: "center",
-              marginBottom: "1rem",
-              border: "1px solid #c3e6cb"
-            }}
-          >
+          <Confetti key={confettiKey} numberOfPieces={250} recycle={false} />
+          <div style={{ backgroundColor: "#d4edda", color: "#155724", padding: "1rem", borderRadius: "8px", textAlign: "center", marginBottom: "1rem", border: "1px solid #c3e6cb" }}>
             ✅ Ride booked successfully!
           </div>
         </>
@@ -607,18 +603,8 @@ const LoginPage = () => {
 
       <h2>Search for a Ride</h2>
       <form onSubmit={handleSearch}>
-        <input
-          type="text"
-          placeholder="Starting Location"
-          value={startLocation}
-          onChange={(e) => setStartLocation(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Destination"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-        />
+        <input type="text" placeholder="Starting Location" value={startLocation} onChange={(e) => setStartLocation(e.target.value)} />
+        <input type="text" placeholder="Destination" value={destination} onChange={(e) => setDestination(e.target.value)} />
         <DatePicker
           selected={date}
           onChange={(d) => setDate(d)}
@@ -634,18 +620,7 @@ const LoginPage = () => {
       {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
 
       {!loading && !error && rides.length === 0 && (
-        <div
-          style={{
-            backgroundColor: "#ffe5e5",
-            color: "#a94442",
-            border: "1px solid #f5c6cb",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginTop: "1.5rem",
-            textAlign: "center",
-            fontWeight: "600"
-          }}
-        >
+        <div style={{ backgroundColor: "#ffe5e5", color: "#a94442", border: "1px solid #f5c6cb", padding: "1rem", borderRadius: "8px", marginTop: "1.5rem", textAlign: "center", fontWeight: "600" }}>
           🚫 No rides found. Try a different location or date.
         </div>
       )}
@@ -653,59 +628,45 @@ const LoginPage = () => {
       <div style={{ marginTop: "2rem" }}>
         {rides.map((ride) => {
           const isFull = ride.availableSeats <= 0;
+          const alreadyBooked = bookedRides[ride._id];
           return (
-            <div
-              key={ride._id}
-              style={{
-                background: "#f9f9f9",
-                color: "#333",
-                border: "1px solid #ddd",
-                padding: "1rem",
-                borderRadius: "8px",
-                marginBottom: "1rem"
-              }}
-            >
+            <div key={ride._id} style={{ background: "#f9f9f9", color: "#333", border: "1px solid #ddd", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
               <p><strong>From:</strong> {ride.startLocation}</p>
               <p><strong>To:</strong> {ride.destination}</p>
-              <p>
-                <strong>Date & Time:</strong>{" "}
-                {new Date(ride.departureTime).toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  hour12: true
-                })}
-              </p>
+              <p><strong>Date & Time:</strong> {new Date(ride.departureTime).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", hour12: true })}</p>
               <p><strong>Seats:</strong> {ride.availableSeats}</p>
               <p><strong>Price:</strong> Ksh {ride.price}</p>
               <p><strong>Driver:</strong> {ride.driver?.fullName} ({ride.driver?.email})</p>
 
-              <button
-                onClick={() => handleBook(ride._id)}
-                disabled={isFull}
-                style={{
-                  marginTop: "0.75rem",
-                  backgroundColor: isFull ? "#ccc" : "#764ba2",
-                  color: isFull ? "#666" : "white",
-                  cursor: isFull ? "not-allowed" : "pointer",
-                  padding: "10px",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontWeight: "600",
-                  transition: "all 0.2s ease"
-                }}
-              >
-                {isFull ? "Fully Booked" : "Book Ride"}
-              </button>
+              {!isFull && !alreadyBooked && (
+                <div style={{ marginTop: "0.75rem" }}>
+                  <input
+                    type="number"
+                    min="1"
+                    max={ride.availableSeats}
+                    placeholder="Seats"
+                    value={bookingSeats[ride._id] || ""}
+                    onChange={(e) => setBookingSeats({ ...bookingSeats, [ride._id]: e.target.value })}
+                    style={{ width: "80px", marginRight: "8px" }}
+                  />
+                  <button
+                    onClick={() => handleBook(ride._id)}
+                    style={{ backgroundColor: "#764ba2", color: "white", padding: "10px", border: "none", borderRadius: "6px", fontWeight: "600" }}
+                  >
+                    Book Ride
+                  </button>
+                </div>
+              )}
+
+              {isFull && <button disabled style={{ backgroundColor: "#ccc", color: "#666", padding: "10px", border: "none", borderRadius: "6px", fontWeight: "600", marginTop: "0.75rem" }}>Fully Booked</button>}
+              {alreadyBooked && <button disabled style={{ backgroundColor: "#999", color: "#fff", padding: "10px", border: "none", borderRadius: "6px", fontWeight: "600", marginTop: "0.75rem" }}>Already Booked</button>}
             </div>
           );
         })}
       </div>
     </div>
   );
-};
-
-
-export default App
+};[
+  
+]
+export default App;

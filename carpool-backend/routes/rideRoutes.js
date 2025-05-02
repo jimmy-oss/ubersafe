@@ -54,6 +54,24 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/book", protect, async (req, res) => {
+  const { rideId } = req.body;
+
+  try {
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ message: "Ride not found" });
+    if (ride.availableSeats <= 0) return res.status(400).json({ message: "No available seats" });
+
+    ride.availableSeats -= 1;
+    await ride.save();
+
+    res.status(200).json({ message: "Booking successful" });
+  } catch (err) {
+    res.status(500).json({ message: "Booking failed", error: err.message });
+  }
+});
+
+
 // ✅ NEW: Book a ride
 router.post("/:id/book", protect, async (req, res) => {
   try {
