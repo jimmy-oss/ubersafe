@@ -18,7 +18,32 @@ import "react-datepicker/dist/react-datepicker.css";
 import Confetti from "react-confetti";
 import api from "./api/axios";
 
- 
+
+const AuthNav = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) return null;
+  return (
+    <>
+      {user.isDriver && <Link to="/post-ride"><FaPlusCircle /> Post Ride</Link>}
+      {!user.isDriver && <Link to="/search"><FaSearchLocation /> Search Rides</Link>}
+      <Link to="/profile"><FaUserAlt /> Profile</Link>
+    </>
+  );
+};
+
+const ProtectedRoute = ({ role, children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user || (role === "driver" && !user.isDriver) || (role === "rider" && user.isDriver)) {
+    return (
+      <div className="form-wrapper">
+        <p style={{ textAlign: 'center', color: 'red' }}>
+          🚫 Unauthorized. You do not have access to this page.
+        </p>
+      </div>
+    );
+  }
+  return children;
+};
 
 
 function App() {
@@ -50,7 +75,6 @@ function App() {
     </div>
   )
 }
-
  
 const HomePage = () => {
   return (
@@ -388,7 +412,7 @@ const LoginPage = () => {
       }, 5000);
       resetForm();
     } catch (err) {
-      setError("Failed to post/update ride");
+      setError("Failed to post/update ride",err);
     }
   };
 
@@ -628,7 +652,7 @@ const SearchRidesPage = () => {
       const res = await api.get("/rides", { params });
       setRides(res.data);
     } catch (err) {
-      setError("Failed to fetch rides");
+      setError("Failed to fetch rides",err);
     } finally {
       setLoading(false);
     }
