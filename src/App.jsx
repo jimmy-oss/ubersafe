@@ -81,42 +81,41 @@ const HomePage = () => {
 
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!formData.email || !formData.password) {
-    return setErrors({ api: 'Email and password required' });
-  }
+    e.preventDefault();
+    try {
+      const res = await api.post("/login", formData);
+      const { token, user } = res.data;
 
-  try {
-    const res = await api.post('/login', formData);
-    const { isDriver, token } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-    // ✅ Save the token to localStorage
-    localStorage.setItem("token", token);
-
-    setSuccess(true);
-    setTimeout(() => navigate(isDriver ? '/post-ride' : '/search'), 2000);
-  } catch (err) {
-    setErrors({ api: err.response?.data?.message || 'Login failed' });
-  }
-};
-
+      setSuccess(true);
+      setTimeout(() => {
+        navigate(user.isDriver ? "/post-ride" : "/search");
+      }, 1500);
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
     <div className="form-wrapper">
       <h2>Login</h2>
       {success && <div className="success-message">✅ Login successful! Redirecting...</div>}
-      {errors.api && <div className="error-message">{errors.api}</div>}
+      {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
-        <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
+        <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} />
         <button type="submit">Login</button>
       </form>
     </div>
@@ -319,6 +318,14 @@ const LoginPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [rides, setRides] = useState([]);
   const [editingRideId, setEditingRideId] = useState(null);
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token || !user?.isDriver) navigate("/search");
+  }, [navigate, token, user]);
+
 
   const fetchMyRides = async () => {
     try {

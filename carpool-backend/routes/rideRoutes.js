@@ -25,6 +25,19 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
+// GET /api/rides/my - Get rides posted by the logged-in driver
+router.get("/my", protect, async (req, res) => {
+  try {
+    const myRides = await Ride.find({ driver: req.user.id })
+      .populate("bookedBy", "fullName email")
+      .sort({ departureTime: 1 });
+    res.status(200).json(myRides);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch your rides", error: error.message });
+  }
+});
+
+
 // GET /api/rides
 router.get("/", async (req, res) => {
   try {
