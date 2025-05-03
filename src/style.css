@@ -12,23 +12,25 @@ body {
   align-items: center;
   justify-content: center;
 }
-.homepage-bg {
+/*.homepage-bg {
   background: url('./assets/background.jpeg') no-repeat center center/cover;
   min-height: 80vh;
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+   
 }
 
 .homepage-bg::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6); /* dark overlay */
+  background: rgba(0, 0, 0, 0.6); /* dark overlay 
   z-index: 0;
 }
-
+*/
 .homepage-content {
   position: relative;
   z-index: 1;
