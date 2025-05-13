@@ -97,7 +97,21 @@ npm run dev
 - Profile Page with image upload
 - Booking success alert
 
-*(Optional: Add images here)*
+---
+### 🧭 Home Page
+![Home Page](./public/screenshots/homepage.png)
+
+### 🚗 Post Ride (Driver)
+![Post Ride](./public/screenshots/post.png)
+![Post Ride](./public/screenshots/post2.png)
+![Post Ride](./public/screenshots/post3.png)
+
+### 🔍 Search Ride (Rider)
+![Search Ride](./public/screenshots/search.png)
+
+### 👤 Profile Page
+![Profile Page](./public/screenshots/profile.png)
+
 
 ---
 
