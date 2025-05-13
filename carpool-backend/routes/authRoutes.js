@@ -7,6 +7,10 @@ const router = express.Router();
 
 // Update profile picture
 router.put('/profile-pic', protect, async (req, res) => {
+  console.log("Incoming /profile-pic request...");
+  console.log("req.user:", req.user);
+  console.log("req.body.profilePic:", req.body.profilePic);
+
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -16,6 +20,7 @@ router.put('/profile-pic', protect, async (req, res) => {
 
     res.status(200).json({ message: 'Profile picture updated', profilePic: user.profilePic });
   } catch (error) {
+    console.error("Error in /profile-pic route:", error);
     res.status(500).json({ message: 'Failed to update profile picture', error: error.message });
   }
 });

@@ -550,21 +550,23 @@ const LoginPage = () => {
     const data = await res.json();
     if (!data.secure_url) throw new Error("Upload failed");
 
-    setProfilePic(data.secure_url);
-
     const token = localStorage.getItem("token");
-    await api.put("/users/profile-pic", { profilePic: data.secure_url }, {
+    
+    // 🔁 Save uploaded image to backend, and receive updated user
+    const response = await api.put("/api/profile-pic", { profilePic: data.secure_url }, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    const updatedUser = { ...user, profilePic: data.secure_url };
+    const updatedUser = { ...user, profilePic: response.data.profilePic };
     localStorage.setItem("user", JSON.stringify(updatedUser));
     setUser(updatedUser);
+    setProfilePic(response.data.profilePic); // ✅ Update local image shown
   } catch (err) {
     console.error(err);
     alert("Failed to upload profile picture");
   }
 };
+
 
 
   const handleLogout = () => {
